@@ -1,0 +1,2899 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hotel Booking System API",
+    "description": "Simple Hotel Booking System REST API - OpenAPI 3.0 Documentation",
+    "contact": {
+      "name": "Hotel Booking Team",
+      "url": "https://www.hotelbooking.com",
+      "email": "support@hotelbooking.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Development Server"
+    },
+    {
+      "url": "https://api.hotelbooking.com",
+      "description": "Production Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "AI Search",
+      "description": "Natural language hotel and room search powered by Claude AI (Anthropic). Accepts plain English queries and returns matching hotels and/or available rooms. Requires USER or ADMIN role."
+    },
+    {
+      "name": "Hotel Management",
+      "description": "CRUD operations for hotels, including image upload/download. GET endpoints require USER or ADMIN role. Write endpoints require ADMIN role."
+    },
+    {
+      "name": "Booking Management",
+      "description": "APIs for creating and managing hotel room bookings. Guests (USER/ADMIN) can create bookings and view their own. All admin-level read and write operations require ADMIN role."
+    },
+    {
+      "name": "Payment Management",
+      "description": "Mock payment APIs for processing and refunding hotel room booking payments. No real payment gateway is involved — all transactions are simulated."
+    },
+    {
+      "name": "Room Management",
+      "description": "CRUD operations for hotel rooms, including image upload/download. GET endpoints require USER or ADMIN role. Write endpoints require ADMIN role."
+    },
+    {
+      "name": "Authentication",
+      "description": "APIs for user registration and login"
+    }
+  ],
+  "paths": {
+    "/api/v1/rooms/{id}": {
+      "get": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Get room by ID",
+        "description": "Retrieves a single room by its database ID.",
+        "operationId": "getRoomById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Room database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Room found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Room not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Update room",
+        "description": "Fully replaces room details by ID. The hotel cannot be changed on update. To update only the image, use `POST /{id}/image` instead.",
+        "operationId": "updateRoom",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Room database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Room updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          },
+          "404": {
+            "description": "Room not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Delete room",
+        "description": "Permanently deletes the room. (ADMIN only)",
+        "operationId": "deleteRoom",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Room database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Room deleted"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Room not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hotels/{id}": {
+      "get": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Get hotel by ID",
+        "description": "Retrieves a single hotel by its database ID.",
+        "operationId": "getHotelById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Hotel database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hotel found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Hotel not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Update hotel",
+        "description": "Fully replaces hotel details by ID. Supply all fields you want to keep — omitted optional fields are cleared. To update only the image, use `POST /{id}/image` instead.",
+        "operationId": "updateHotel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Hotel database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Hotel updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          },
+          "404": {
+            "description": "Hotel not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Delete hotel",
+        "description": "Permanently deletes the hotel and all its rooms. (ADMIN only)",
+        "operationId": "deleteHotel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Hotel database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Hotel deleted"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Hotel not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bookings/{id}": {
+      "get": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Get booking by ID",
+        "description": "Retrieves a single booking by its database ID. (ADMIN only)",
+        "operationId": "getBookingById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Booking database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.BookingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Booking not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Update booking",
+        "description": "Updates booking details by ID. The room cannot be changed on update. If new dates are provided, totalPrice is recalculated automatically. To change status/payment, include bookingStatus or paymentStatus in the body. (ADMIN only)",
+        "operationId": "updateBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Booking database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.BookingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Booking updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.BookingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed or invalid date range"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "409": {
+            "description": "Room already booked for selected dates"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Delete booking",
+        "description": "Permanently deletes a booking by ID. (ADMIN only)",
+        "operationId": "deleteBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Booking database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Booking deleted"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Booking not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rooms": {
+      "get": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Get all rooms (paginated + filtered)",
+        "description": "Returns a paginated list of rooms. All filter parameters are optional and combinable. Valid `sortBy` values: `id`, `roomNumber`, `price`, `weekendPrice`, `roomType`, `bedType`, `maxOccupancy`, `floorNumber`, `roomSizeInSqFt`, `status`.",
+        "operationId": "getAllRooms",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (0-based)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Page size (max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort field",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "id"
+            },
+            "example": "price"
+          },
+          {
+            "name": "sortDir",
+            "in": "query",
+            "description": "Sort direction: asc or desc",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc"
+            },
+            "example": "asc"
+          },
+          {
+            "name": "hotelId",
+            "in": "query",
+            "description": "Filter by hotel ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          },
+          {
+            "name": "roomNumber",
+            "in": "query",
+            "description": "Filter by room number (partial)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": 10
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "description": "Minimum nightly price",
+            "required": false,
+            "schema": {
+              "type": "number"
+            },
+            "example": 100
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "description": "Maximum nightly price",
+            "required": false,
+            "schema": {
+              "type": "number"
+            },
+            "example": 500
+          },
+          {
+            "name": "roomType",
+            "in": "query",
+            "description": "Filter by room type. Allowed: SINGLE, DOUBLE, SUITE, DELUXE, FAMILY",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SINGLE",
+                "DOUBLE",
+                "SUITE",
+                "DELUXE",
+                "FAMILY"
+              ]
+            },
+            "example": "SUITE"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status. Allowed: AVAILABLE, BOOKED, MAINTENANCE, OUT_OF_SERVICE",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AVAILABLE",
+                "BOOKED",
+                "MAINTENANCE",
+                "OUT_OF_SERVICE"
+              ]
+            },
+            "example": "AVAILABLE"
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "Filter by active flag. true = bookable rooms only",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rooms retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.PagedResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Create a new room",
+        "description": "Creates a room under an existing hotel. **roomNumber**, **price**, and **hotelId** are required. All other fields are optional. The response includes **`hotelName`** (denormalized for display) and **`hasImage`** (`true` when an image has been stored). To attach an image, use the dedicated `POST /{id}/image` endpoint after creation.",
+        "operationId": "createRoom",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Room created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          },
+          "404": {
+            "description": "Hotel not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rooms/{id}/image": {
+      "get": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Get room image (raw bytes)",
+        "description": "Returns the raw image bytes with the correct `Content-Type` header. Use this URL directly as the `src` of an `\u003Cimg\u003E` tag. Returns 404 if no image has been uploaded.",
+        "operationId": "getRoomImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Room database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image bytes returned",
+            "content": {
+              "image/jpeg": {
+
+              },
+              "image/png": {
+
+              },
+              "image/webp": {
+
+              },
+              "image/gif": {
+
+              }
+            }
+          },
+          "404": {
+            "description": "Room not found or no image uploaded"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Upload / replace room image",
+        "description": "Uploads an image file and stores it as a BLOB in the database. Accepted types: **image/jpeg**, **image/png**, **image/webp**, **image/gif**. Re-uploading replaces the previous image. After a successful upload, **`hasImage`** will be `true` in the room response. Use `GET /{id}/image` directly as the `\u003Cimg src\u003E` to display it in the UI. (ADMIN only)",
+        "operationId": "uploadRoomImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Room database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (jpeg/png/webp/gif). Field name must be `file`."
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              },
+              "encoding": {
+                "file": {
+                  "contentType": "multipart/form-data"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded — full room details returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "File is empty or not an image type"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          },
+          "404": {
+            "description": "Room not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Delete room image",
+        "description": "Removes the stored image BLOB from the database. (ADMIN only)",
+        "operationId": "deleteRoomImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Room database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Image removed"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Room not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payments/refund/{bookingId}": {
+      "post": {
+        "tags": [
+          "Payment Management"
+        ],
+        "summary": "Refund a mock payment",
+        "description": "Refunds the payment for a PAID booking. On success, bookingStatus becomes CANCELLED and paymentStatus becomes REFUNDED. Only ADMIN can issue refunds.",
+        "operationId": "refundPayment",
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "path",
+            "description": "Booking database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Refund processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.PaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Booking is not in PAID status"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          },
+          "404": {
+            "description": "Booking not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payments/process": {
+      "post": {
+        "tags": [
+          "Payment Management"
+        ],
+        "summary": "Process a mock payment",
+        "description": "Processes a mock payment for a PENDING booking. The amount must match the booking total price. On success, bookingStatus becomes CONFIRMED and paymentStatus becomes PAID. Returns a mock transactionId (e.g. TXN-A1B2C3D4).",
+        "operationId": "processPayment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.PaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Payment processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.PaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed or amount mismatch"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "409": {
+            "description": "Booking is already paid or refunded"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hotels": {
+      "get": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Get all hotels (paginated + filtered)",
+        "description": "Returns a paginated list of hotels. All filter parameters are optional and can be combined freely. Valid `sortBy` values: `id`, `name`, `location`, `city`, `country`, `starRating`, `hotelType`, `checkInTime`.",
+        "operationId": "getAllHotels",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (0-based)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Page size (max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Field to sort by. Allowed: id, name, location, city, country, starRating, hotelType, checkInTime",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "name"
+            },
+            "example": "name"
+          },
+          {
+            "name": "sortDir",
+            "in": "query",
+            "description": "Sort direction: `asc` or `desc`",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc"
+            },
+            "example": "asc"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by hotel name (partial, case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Taj"
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "description": "Filter by location (partial, case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Mumbai"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "Filter by city (partial, case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "New York"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "Filter by country (partial, case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "India"
+          },
+          {
+            "name": "starRating",
+            "in": "query",
+            "description": "Filter by star rating (1–5)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 5
+          },
+          {
+            "name": "hotelType",
+            "in": "query",
+            "description": "Filter by hotel type. Allowed values: BUDGET, LUXURY, BOUTIQUE, RESORT, BUSINESS",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BUDGET",
+                "LUXURY",
+                "BOUTIQUE",
+                "RESORT",
+                "BUSINESS"
+              ]
+            },
+            "example": "LUXURY"
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "Filter by active status. Omit to return all; pass `true` for active only, `false` for inactive only",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hotels retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.PagedResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Create a new hotel",
+        "description": "Creates a hotel with full details. Only **name** and **location** are required. All other fields (description, address, starRating, hotelType, checkInTime, amenities, etc.) are optional. To attach an image, use the dedicated `POST /{id}/image` endpoint after creation. The response includes a **`hasImage`** boolean — `true` when an image is stored. Use `GET /{id}/image` as the `\u003Cimg src\u003E` to display it.",
+        "operationId": "createHotel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Hotel created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed — missing required fields or invalid values"
+          },
+          "401": {
+            "description": "Unauthorized — JWT token missing or invalid"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hotels/{id}/image": {
+      "get": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Get hotel image (raw bytes)",
+        "description": "Returns the raw image bytes with the correct `Content-Type` header (e.g. `image/jpeg`). Use this URL directly as the `src` attribute of an `\u003Cimg\u003E` tag. Returns **404** if no image has been uploaded for this hotel.",
+        "operationId": "getHotelImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Hotel database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image bytes returned",
+            "content": {
+              "image/jpeg": {
+
+              },
+              "image/png": {
+
+              },
+              "image/webp": {
+
+              },
+              "image/gif": {
+
+              }
+            }
+          },
+          "404": {
+            "description": "Hotel not found or no image uploaded"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Upload / replace hotel image",
+        "description": "Uploads an image file and stores it as a BLOB in the database. Accepted types: **image/jpeg**, **image/png**, **image/webp**, **image/gif**. Re-uploading replaces the previous image. After a successful upload, **`hasImage`** will be `true` in the hotel response. Use `GET /{id}/image` directly as the `\u003Cimg src\u003E` to display it in the UI.",
+        "operationId": "uploadHotelImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Hotel database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (jpeg/png/webp/gif). Field name must be `file`."
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              },
+              "encoding": {
+                "file": {
+                  "contentType": "multipart/form-data"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded — full hotel details returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "File is empty or not an image type"
+          },
+          "403": {
+            "description": "Forbidden — ADMIN role required"
+          },
+          "404": {
+            "description": "Hotel not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Delete hotel image",
+        "description": "Removes the stored image BLOB from the database for the given hotel. (ADMIN only)",
+        "operationId": "deleteHotelImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Hotel database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Image removed"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Hotel not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bookings": {
+      "get": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Get all bookings (paginated + filtered)",
+        "description": "Returns a paginated list of all bookings. All filter params are optional. Valid `sortBy` values: `id`, `guestName`, `checkInDate`, `checkOutDate`, `totalPrice`, `bookingStatus`, `paymentStatus`, `createdAt`, `updatedAt`. (ADMIN only)",
+        "operationId": "getAllBookings",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (0-based)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Page size (max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort field",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "checkInDate"
+            },
+            "example": "checkInDate"
+          },
+          {
+            "name": "sortDir",
+            "in": "query",
+            "description": "Sort direction: asc or desc",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc"
+            },
+            "example": "asc"
+          },
+          {
+            "name": "roomId",
+            "in": "query",
+            "description": "Filter by room ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          },
+          {
+            "name": "guestName",
+            "in": "query",
+            "description": "Filter by guest name (partial match)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Yeshwanth"
+          },
+          {
+            "name": "checkInFrom",
+            "in": "query",
+            "description": "Check-in date from (inclusive, yyyy-MM-dd)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2026-06-01"
+          },
+          {
+            "name": "checkInTo",
+            "in": "query",
+            "description": "Check-in date to (inclusive, yyyy-MM-dd)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2026-12-31"
+          },
+          {
+            "name": "bookingStatus",
+            "in": "query",
+            "description": "Filter by booking status. Allowed: PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "CONFIRMED",
+                "CANCELLED",
+                "COMPLETED",
+                "NO_SHOW"
+              ]
+            },
+            "example": "CONFIRMED"
+          },
+          {
+            "name": "paymentStatus",
+            "in": "query",
+            "description": "Filter by payment status. Allowed: PENDING, PAID, REFUNDED, FAILED",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "PAID",
+                "REFUNDED",
+                "FAILED"
+              ]
+            },
+            "example": "PAID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookings retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.PagedResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Create a booking",
+        "description": "Creates a new room booking for the authenticated user. **guestName**, **checkInDate**, **checkOutDate** and **roomId** are required. A unique **confirmationNumber** (e.g. BK-A1B2C3D4) and **totalPrice** (roomPrice × nights) are auto-calculated. The response includes **`roomType`**, **`roomNumber`**, **`hotelId`** and **`hotelName`** for display convenience. Default bookingStatus = PENDING, paymentStatus = PENDING.",
+        "operationId": "createBooking",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.BookingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Booking created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.BookingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed or invalid date range"
+          },
+          "409": {
+            "description": "Room already booked for selected dates"
+          },
+          "404": {
+            "description": "Room not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bookings/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Cancel a booking",
+        "description": "Cancels a booking by ID. **USER** can only cancel their own bookings. **ADMIN** can cancel any booking. If the booking was already **PAID**, a refund is automatically issued (`paymentStatus → REFUNDED`). Bookings with status **COMPLETED** or **NO_SHOW** cannot be cancelled. A descriptive cancellation message is included in the response.",
+        "operationId": "cancelBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Booking database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.CancellationResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — cannot cancel another user's booking"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "409": {
+            "description": "Booking is already cancelled, completed, or a no-show"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/search": {
+      "post": {
+        "tags": [
+          "AI Search"
+        ],
+        "summary": "Natural language hotel & room search",
+        "description": "Accepts a plain English query and returns results in two phases:\n\n**Phase 1 — always runs:** Claude extracts `location`, `city`, `country`, `hotelName`, `starRating` and delegates to the existing hotel search filters.\n\n**Phase 2 — runs when dates are present:** Claude additionally extracts `checkInDate` and `checkOutDate`, then returns only rooms that are AVAILABLE and have no overlapping bookings for those dates.\n\n**Example queries:**\n- `Hotels in Mumbai`\n- `Hotels in Mumbai under ₹5000`\n- `Available rooms in Singapore next weekend`\n- `Hotels in New York from June 10 to June 15 under $300`",
+        "operationId": "search",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.ai.dto.AiSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Search completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.ai.dto.AiSearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Blank query or query exceeds 500 characters"
+          },
+          "401": {
+            "description": "Unauthorized — JWT token missing or invalid"
+          },
+          "403": {
+            "description": "Forbidden — USER or ADMIN role required"
+          },
+          "500": {
+            "description": "AI service error — check that ANTHROPIC_API_KEY is set correctly"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register a new user",
+        "description": "Register a new application user and return profile metadata",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Username or email already exists",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.AuthenticationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authenticate user",
+        "description": "Authenticate a user and return a JWT token with profile metadata",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.AuthenticationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.AuthenticationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rooms/hotel/{hotelId}": {
+      "get": {
+        "tags": [
+          "Room Management"
+        ],
+        "summary": "Get all rooms for a hotel",
+        "description": "Returns all rooms belonging to the specified hotel.",
+        "operationId": "getRoomsByHotelId",
+        "parameters": [
+          {
+            "name": "hotelId",
+            "in": "path",
+            "description": "Hotel database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rooms retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Hotel not found or no rooms exist"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hotels/name/{name}": {
+      "get": {
+        "tags": [
+          "Hotel Management"
+        ],
+        "summary": "Get hotel by exact name",
+        "description": "Looks up a hotel by its exact name (case-sensitive).",
+        "operationId": "getHotelByName",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Exact hotel name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Taj Hotel"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hotel found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No hotel found with that name"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bookings/room/{roomId}": {
+      "get": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Get bookings by room ID",
+        "description": "Retrieves all bookings for a specific room. (ADMIN only)",
+        "operationId": "getBookingsByRoomId",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "description": "Room database ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookings retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.BookingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Room not found or no bookings for room"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bookings/me": {
+      "get": {
+        "tags": [
+          "Booking Management"
+        ],
+        "summary": "Get my bookings",
+        "description": "Returns all bookings belonging to the currently authenticated user. Sorted by check-in date descending.",
+        "operationId": "getMyBookings",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (0-based)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Page size (max 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User bookings retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.PagedResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.hotelbooking.simplehotelbookingapp.dto.RoomRequest": {
+        "type": "object",
+        "description": "Request body for creating or updating a room. roomNumber, price and hotelId are required.",
+        "properties": {
+          "roomNumber": {
+            "type": "string",
+            "description": "Room number or identifier",
+            "example": "101",
+            "minLength": 1
+          },
+          "price": {
+            "type": "number",
+            "description": "Nightly base price (must be \u003E 0)",
+            "example": "150.00",
+            "minimum": 0
+          },
+          "hotelId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the hotel this room belongs to",
+            "example": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Short description of the room",
+            "example": "Spacious suite with ocean view and private balcony."
+          },
+          "roomType": {
+            "type": "string",
+            "description": "Room category. Allowed: SINGLE, DOUBLE, SUITE, DELUXE, FAMILY",
+            "enum": [
+              "SINGLE",
+              "DOUBLE",
+              "SUITE",
+              "DELUXE",
+              "FAMILY"
+            ],
+            "example": "SUITE"
+          },
+          "bedType": {
+            "type": "string",
+            "description": "Bed configuration e.g. KING, QUEEN, TWIN, DOUBLE",
+            "example": "KING"
+          },
+          "maxOccupancy": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Maximum number of guests allowed",
+            "example": 2
+          },
+          "floorNumber": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Floor on which the room is located",
+            "example": 5
+          },
+          "roomSizeInSqFt": {
+            "type": "number",
+            "format": "double",
+            "description": "Room size in square feet",
+            "example": "450.0"
+          },
+          "viewType": {
+            "type": "string",
+            "description": "View type e.g. OCEAN, CITY, GARDEN, POOL, MOUNTAIN",
+            "example": "OCEAN"
+          },
+          "weekendPrice": {
+            "type": "number",
+            "description": "Weekend/peak price (must be \u003E 0 if provided)",
+            "example": "200.00",
+            "minimum": 0
+          },
+          "amenities": {
+            "type": "array",
+            "description": "List of in-room amenities",
+            "example": [
+              "AC",
+              "TV",
+              "Mini Bar",
+              "Safe"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Room operational status. Allowed: AVAILABLE, BOOKED, MAINTENANCE, OUT_OF_SERVICE",
+            "enum": [
+              "AVAILABLE",
+              "BOOKED",
+              "MAINTENANCE",
+              "OUT_OF_SERVICE"
+            ],
+            "example": "AVAILABLE"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the room is active and bookable. Defaults to true.",
+            "example": true
+          },
+          "imageBase64": {
+            "type": "string",
+            "description": "Base64-encoded image bytes. For UI uploads use POST /{id}/image instead.",
+            "example": "/9j/4AAQSkZJRgAB..."
+          },
+          "imageContentType": {
+            "type": "string",
+            "description": "MIME type of the image in imageBase64.",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "image/gif"
+            ],
+            "example": "image/jpeg"
+          }
+        },
+        "required": [
+          "hotelId",
+          "price",
+          "roomNumber"
+        ]
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.RoomResponse": {
+        "type": "object",
+        "description": "Full room details returned by the API.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Auto-generated room ID",
+            "example": 1
+          },
+          "roomNumber": {
+            "type": "string",
+            "description": "Room number or identifier",
+            "example": "101"
+          },
+          "price": {
+            "type": "number",
+            "description": "Nightly base price",
+            "example": "150.00"
+          },
+          "hotelId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the hotel this room belongs to",
+            "example": 1
+          },
+          "hotelName": {
+            "type": "string",
+            "description": "Name of the hotel this room belongs to",
+            "example": "Taj Hotel"
+          },
+          "description": {
+            "type": "string",
+            "description": "Short description of the room",
+            "example": "Spacious suite with ocean view."
+          },
+          "roomType": {
+            "type": "string",
+            "description": "Room category",
+            "enum": [
+              "SINGLE",
+              "DOUBLE",
+              "SUITE",
+              "DELUXE",
+              "FAMILY"
+            ],
+            "example": "SUITE"
+          },
+          "bedType": {
+            "type": "string",
+            "description": "Bed configuration",
+            "example": "KING"
+          },
+          "maxOccupancy": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Maximum number of guests",
+            "example": 2
+          },
+          "floorNumber": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Floor number",
+            "example": 5
+          },
+          "roomSizeInSqFt": {
+            "type": "number",
+            "format": "double",
+            "description": "Room size in square feet",
+            "example": "450.0"
+          },
+          "viewType": {
+            "type": "string",
+            "description": "View type from the room",
+            "example": "OCEAN"
+          },
+          "weekendPrice": {
+            "type": "number",
+            "description": "Weekend / peak nightly price",
+            "example": "200.00"
+          },
+          "amenities": {
+            "type": "array",
+            "description": "List of in-room amenities",
+            "example": [
+              "AC",
+              "TV",
+              "Mini Bar"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Operational status of the room",
+            "enum": [
+              "AVAILABLE",
+              "BOOKED",
+              "MAINTENANCE",
+              "OUT_OF_SERVICE"
+            ],
+            "example": "AVAILABLE"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the room is active and bookable",
+            "example": true
+          },
+          "hasImage": {
+            "type": "boolean",
+            "description": "True if a room image has been uploaded. Use GET /api/v1/rooms/{id}/image as \u003Cimg src\u003E to display it.",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Record creation timestamp (ISO-8601)",
+            "example": "2026-05-30T10:00:00"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Record last-updated timestamp (ISO-8601)",
+            "example": "2026-05-30T12:30:00"
+          }
+        }
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.HotelRequest": {
+        "type": "object",
+        "description": "Request body for creating or updating a hotel. Only name and location are required.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Hotel name",
+            "example": "Taj Hotel",
+            "minLength": 1
+          },
+          "location": {
+            "type": "string",
+            "description": "General location / area of the hotel",
+            "example": "Mumbai",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Short marketing description (max 500 chars)",
+            "example": "An iconic luxury hotel overlooking the Gateway of India."
+          },
+          "address": {
+            "type": "string",
+            "description": "Full street address",
+            "example": "Apollo Bunder, Colaba"
+          },
+          "city": {
+            "type": "string",
+            "description": "City where the hotel is located",
+            "example": "Mumbai"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or province",
+            "example": "Maharashtra"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country (full name or ISO code)",
+            "example": "India"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Hotel contact phone number",
+            "example": "+91-22-6665-3366"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Hotel contact email address",
+            "example": "info@tajhotels.com"
+          },
+          "starRating": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Star rating from 1 (budget) to 5 (luxury)",
+            "example": 5,
+            "maximum": 5,
+            "minimum": 1
+          },
+          "hotelType": {
+            "type": "string",
+            "description": "Hotel classification. Allowed values: BUDGET, LUXURY, BOUTIQUE, RESORT, BUSINESS",
+            "enum": [
+              "BUDGET",
+              "LUXURY",
+              "BOUTIQUE",
+              "RESORT",
+              "BUSINESS"
+            ],
+            "example": "LUXURY"
+          },
+          "checkInTime": {
+            "type": "string",
+            "description": "Hotel check-in time in HH:mm format (24-hour clock)",
+            "example": "14:00"
+          },
+          "checkOutTime": {
+            "type": "string",
+            "description": "Hotel check-out time in HH:mm format (24-hour clock)",
+            "example": "11:00"
+          },
+          "imageBase64": {
+            "type": "string",
+            "description": "Base64-encoded image bytes. Use this field only for programmatic uploads. For UI uploads use the dedicated POST /{id}/image endpoint instead.",
+            "example": "/9j/4AAQSkZJRgAB..."
+          },
+          "imageContentType": {
+            "type": "string",
+            "description": "MIME type of the image provided in imageBase64. Required when imageBase64 is set.",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "image/gif"
+            ],
+            "example": "image/jpeg"
+          },
+          "amenities": {
+            "type": "array",
+            "description": "List of amenities offered by the hotel",
+            "example": [
+              "Free WiFi",
+              "Swimming Pool",
+              "Spa",
+              "Gym",
+              "Restaurant"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the hotel is active and visible to users. Defaults to true if omitted.",
+            "example": true
+          }
+        },
+        "required": [
+          "location",
+          "name"
+        ]
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.HotelResponse": {
+        "type": "object",
+        "description": "Full hotel details returned by the API.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Auto-generated hotel ID",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Hotel name",
+            "example": "Taj Hotel"
+          },
+          "location": {
+            "type": "string",
+            "description": "General location / area",
+            "example": "Mumbai"
+          },
+          "description": {
+            "type": "string",
+            "description": "Short marketing description",
+            "example": "An iconic luxury hotel overlooking the Gateway of India."
+          },
+          "address": {
+            "type": "string",
+            "description": "Full street address",
+            "example": "Apollo Bunder, Colaba"
+          },
+          "city": {
+            "type": "string",
+            "description": "City",
+            "example": "Mumbai"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or province",
+            "example": "Maharashtra"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country",
+            "example": "India"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Hotel contact phone",
+            "example": "+91-22-6665-3366"
+          },
+          "email": {
+            "type": "string",
+            "description": "Hotel contact email",
+            "example": "info@tajhotels.com"
+          },
+          "starRating": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Star rating (1–5)",
+            "example": 5
+          },
+          "hotelType": {
+            "type": "string",
+            "description": "Hotel classification",
+            "enum": [
+              "BUDGET",
+              "LUXURY",
+              "BOUTIQUE",
+              "RESORT",
+              "BUSINESS"
+            ],
+            "example": "LUXURY"
+          },
+          "checkInTime": {
+            "type": "string",
+            "description": "Check-in time in HH:mm format",
+            "example": "14:00"
+          },
+          "checkOutTime": {
+            "type": "string",
+            "description": "Check-out time in HH:mm format",
+            "example": "11:00"
+          },
+          "hasImage": {
+            "type": "boolean",
+            "description": "True if a hotel image has been uploaded. Use GET /api/v1/hotels/{id}/image as \u003Cimg src\u003E to display it.",
+            "example": true
+          },
+          "amenities": {
+            "type": "array",
+            "description": "List of amenities",
+            "example": [
+              "Free WiFi",
+              "Pool",
+              "Spa"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the hotel is active and visible to users",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the hotel record was created (ISO-8601)",
+            "example": "2026-05-30T10:00:00"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the hotel record was last updated (ISO-8601)",
+            "example": "2026-05-30T12:30:00"
+          }
+        }
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.BookingRequest": {
+        "type": "object",
+        "description": "Request body for creating or updating a booking. guestName, checkInDate, checkOutDate and roomId are required.",
+        "properties": {
+          "guestName": {
+            "type": "string",
+            "description": "Full name of the guest",
+            "example": "Yeshwanth Kumar",
+            "minLength": 1
+          },
+          "checkInDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-in date (ISO-8601: yyyy-MM-dd)",
+            "example": "2026-06-01"
+          },
+          "checkOutDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-out date (ISO-8601: yyyy-MM-dd). Must be after checkInDate.",
+            "example": "2026-06-05"
+          },
+          "roomId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the room to book",
+            "example": 1
+          },
+          "guestEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Guest email address for booking confirmation",
+            "example": "guest@email.com"
+          },
+          "guestPhone": {
+            "type": "string",
+            "description": "Guest contact phone number",
+            "example": "+91-9876543210"
+          },
+          "numberOfGuests": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of guests staying (minimum 1)",
+            "example": 2,
+            "minimum": 1
+          },
+          "specialRequests": {
+            "type": "string",
+            "description": "Any special requests or preferences",
+            "example": "Non-smoking room, high floor preferred"
+          },
+          "bookingStatus": {
+            "type": "string",
+            "description": "Booking lifecycle status. Allowed: PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW. Defaults to PENDING on create.",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "CANCELLED",
+              "COMPLETED",
+              "NO_SHOW"
+            ],
+            "example": "CONFIRMED"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "description": "Payment status. Allowed: PENDING, PAID, REFUNDED, FAILED. Defaults to PENDING on create.",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "REFUNDED",
+              "FAILED"
+            ],
+            "example": "PAID"
+          }
+        },
+        "required": [
+          "checkInDate",
+          "checkOutDate",
+          "guestName",
+          "roomId"
+        ]
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.BookingResponse": {
+        "type": "object",
+        "description": "Full booking details returned by the API.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Auto-generated booking ID",
+            "example": 1
+          },
+          "confirmationNumber": {
+            "type": "string",
+            "description": "Unique booking reference number",
+            "example": "BK-A1B2C3D4"
+          },
+          "guestName": {
+            "type": "string",
+            "description": "Full name of the guest",
+            "example": "Yeshwanth Kumar"
+          },
+          "guestEmail": {
+            "type": "string",
+            "description": "Guest email address",
+            "example": "guest@email.com"
+          },
+          "guestPhone": {
+            "type": "string",
+            "description": "Guest contact phone number",
+            "example": "+91-9876543210"
+          },
+          "numberOfGuests": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of guests",
+            "example": 2
+          },
+          "checkInDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-in date (yyyy-MM-dd)",
+            "example": "2026-06-01"
+          },
+          "checkOutDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-out date (yyyy-MM-dd)",
+            "example": "2026-06-05"
+          },
+          "totalPrice": {
+            "type": "number",
+            "description": "Total price for the stay (room price × nights)",
+            "example": "600.00"
+          },
+          "bookingStatus": {
+            "type": "string",
+            "description": "Booking lifecycle status",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "CANCELLED",
+              "COMPLETED",
+              "NO_SHOW"
+            ],
+            "example": "CONFIRMED"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "description": "Payment status",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "REFUNDED",
+              "FAILED"
+            ],
+            "example": "PAID"
+          },
+          "specialRequests": {
+            "type": "string",
+            "description": "Special requests or preferences",
+            "example": "Non-smoking room, high floor preferred"
+          },
+          "roomId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the booked room",
+            "example": 1
+          },
+          "roomNumber": {
+            "type": "string",
+            "description": "Room number of the booked room",
+            "example": "101"
+          },
+          "roomType": {
+            "type": "string",
+            "description": "Room category of the booked room",
+            "enum": [
+              "SINGLE",
+              "DOUBLE",
+              "SUITE",
+              "DELUXE",
+              "FAMILY"
+            ],
+            "example": "SUITE"
+          },
+          "hotelId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the hotel the room belongs to",
+            "example": 1
+          },
+          "hotelName": {
+            "type": "string",
+            "description": "Name of the hotel the room belongs to",
+            "example": "Taj Hotel"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the user who made the booking",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Booking creation timestamp (ISO-8601)",
+            "example": "2026-05-30T10:00:00"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Booking last-updated timestamp (ISO-8601)",
+            "example": "2026-05-30T12:30:00"
+          }
+        }
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.PaymentResponse": {
+        "type": "object",
+        "description": "Response returned after a mock payment is processed or refunded.",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "description": "Mock transaction reference number",
+            "example": "TXN-A1B2C3D4"
+          },
+          "bookingId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Booking ID the payment belongs to",
+            "example": 1
+          },
+          "confirmationNumber": {
+            "type": "string",
+            "description": "Unique booking confirmation number",
+            "example": "BK-A1B2C3D4"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Payment method used",
+            "enum": [
+              "CREDIT_CARD",
+              "DEBIT_CARD",
+              "UPI",
+              "CASH"
+            ],
+            "example": "CREDIT_CARD"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount paid or refunded",
+            "example": "600.00"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "description": "Updated payment status",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "REFUNDED",
+              "FAILED"
+            ],
+            "example": "PAID"
+          },
+          "bookingStatus": {
+            "type": "string",
+            "description": "Updated booking status",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "CANCELLED",
+              "COMPLETED",
+              "NO_SHOW"
+            ],
+            "example": "CONFIRMED"
+          },
+          "processedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the payment was processed (ISO-8601)",
+            "example": "2026-05-30T10:15:00"
+          }
+        }
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.PaymentRequest": {
+        "type": "object",
+        "description": "Request body to process a mock payment for an existing booking.",
+        "properties": {
+          "bookingId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the booking to pay for",
+            "example": 1
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Payment method. Allowed: CREDIT_CARD, DEBIT_CARD, UPI, CASH",
+            "enum": [
+              "CREDIT_CARD",
+              "DEBIT_CARD",
+              "UPI",
+              "CASH"
+            ],
+            "example": "CREDIT_CARD"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount to pay. Must match the booking total price.",
+            "example": "600.00",
+            "minimum": 0.01
+          }
+        },
+        "required": [
+          "amount",
+          "bookingId",
+          "paymentMethod"
+        ]
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.CancellationResponse": {
+        "type": "object",
+        "description": "Response returned after a booking is successfully cancelled.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Human-readable cancellation message",
+            "example": "Booking BK-A1B2C3D4 has been successfully cancelled."
+          },
+          "bookingId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Booking database ID",
+            "example": 1
+          },
+          "confirmationNumber": {
+            "type": "string",
+            "description": "Unique booking confirmation number",
+            "example": "BK-A1B2C3D4"
+          },
+          "bookingStatus": {
+            "type": "string",
+            "description": "Updated booking status after cancellation",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "CANCELLED",
+              "COMPLETED",
+              "NO_SHOW"
+            ],
+            "example": "CANCELLED"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "description": "Updated payment status after cancellation",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "REFUNDED",
+              "FAILED"
+            ],
+            "example": "REFUNDED"
+          },
+          "refunded": {
+            "type": "boolean",
+            "description": "Whether a refund was issued due to a prior PAID payment",
+            "example": true
+          }
+        }
+      },
+      "com.hotelbooking.simplehotelbookingapp.ai.dto.AiSearchRequest": {
+        "type": "object",
+        "description": "Natural language hotel search request.",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Plain English search query.",
+            "example": "Hotels in Mumbai under ₹5000 from June 10 to June 15",
+            "maxLength": 500,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "com.hotelbooking.simplehotelbookingapp.ai.dto.AiSearchResponse": {
+        "type": "object",
+        "description": "AI search response — matched hotels and, when dates were provided, available rooms.",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Original user query",
+            "example": "Hotels in Mumbai under ₹5000 from June 10 to June 15"
+          },
+          "hotels": {
+            "type": "array",
+            "description": "Hotels matching the extracted criteria (location, city, name, star rating).",
+            "items": {
+              "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.HotelResponse"
+            }
+          },
+          "availableRooms": {
+            "type": "array",
+            "description": "Available rooms for the extracted date range. Only populated when check-in and check-out dates were found in the query.",
+            "items": {
+              "$ref": "#/components/schemas/com.hotelbooking.simplehotelbookingapp.dto.RoomResponse"
+            }
+          },
+          "availabilitySearch": {
+            "type": "boolean",
+            "description": "True when check-in/check-out dates were extracted and availability was checked.",
+            "example": true
+          },
+          "totalHotels": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of hotels matched.",
+            "example": 3
+          },
+          "totalAvailableRooms": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of available rooms matched.",
+            "example": 5
+          }
+        }
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 8
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "USER"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "role",
+          "username"
+        ]
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.AuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "USER"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.AuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "password",
+          "username"
+        ]
+      },
+      "com.hotelbooking.simplehotelbookingapp.dto.PagedResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "last": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

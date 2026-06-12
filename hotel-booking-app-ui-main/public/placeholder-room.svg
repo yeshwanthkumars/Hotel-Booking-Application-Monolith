@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <rect x="50" y="50" width="300" height="200" fill="#e5e7eb" stroke="#d1d5db" stroke-width="2"/>
+  <rect x="70" y="70" width="130" height="100" fill="#d1d5db" stroke="#9ca3af" stroke-width="1.5"/>
+  <rect x="210" y="70" width="130" height="100" fill="#d1d5db" stroke="#9ca3af" stroke-width="1.5"/>
+  <rect x="70" y="180" width="270" height="50" fill="#d1d5db" stroke="#9ca3af" stroke-width="1.5"/>
+  <circle cx="200" cy="150" r="40" fill="#9ca3af" opacity="0.3"/>
+  <text x="200" y="265" font-size="18" font-weight="600" text-anchor="middle" fill="#6b7280">Room Image</text>
+</svg>
