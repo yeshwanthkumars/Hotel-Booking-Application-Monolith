@@ -1,0 +1,42 @@
+@startuml BookingSequence
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 6
+
+title Booking Scenario (Create Booking)
+
+actor "User/Admin" as U
+participant "JwtAuthenticationFilter" as JF
+participant "BookingController" as BC
+participant "BookingService" as BS
+participant "RoomRepository" as RR
+participant "BookingRepository" as BR
+
+U -> JF : POST /api/v1/bookings\n{guestName, checkInDate, checkOutDate, roomId}
+alt role = USER or ADMIN
+  JF -> BC : Authorized request
+  BC -> BS : createBooking(bookingRequest)
+
+  BS -> BS : validate checkOut > checkIn
+  alt invalid date range
+    BS --> BC : InvalidDateException
+    BC --> U : 400 Bad Request
+  else valid dates
+    BS -> RR : findById(roomId)
+    alt room exists
+      RR --> BS : Room
+      BS -> BR : save(booking)
+      BR --> BS : saved booking
+      BS --> BC : BookingResponse
+      BC --> U : 201 Created
+    else room missing
+      RR --> BS : empty
+      BS --> BC : ResourceNotFoundException
+      BC --> U : 404 Not Found
+    end
+  end
+else unauthenticated/invalid token
+  JF --> U : 401 Unauthorized
+end
+
+@enduml
+

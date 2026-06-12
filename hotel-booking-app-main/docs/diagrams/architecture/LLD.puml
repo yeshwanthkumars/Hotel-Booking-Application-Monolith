@@ -1,0 +1,204 @@
+@startuml LLD
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+title Low-Level Design - Core Components and Relationships
+
+package "config" {
+  class SecurityConfig
+  class ApplicationConfig
+  class JwtProperties
+  class LangChain4jConfig {
+    +apiKey: String
+    +modelName: String
+    +anthropicChatModel(): AnthropicChatModel
+    +queryParserAiService(): QueryParserAiService
+  }
+  class CorsConfig
+  class OpenApiConfig
+}
+
+package "security" {
+  class JwtAuthenticationFilter
+  class JwtService
+  class CustomUserDetailsService
+  class JwtAuthenticationEntryPoint
+  class JwtAccessDeniedHandler
+}
+
+package "controller" {
+  class AuthController
+  class HotelController
+  class RoomController
+  class BookingController
+  class PaymentController {
+    +processPayment(): ResponseEntity
+    +refundPayment(): ResponseEntity
+  }
+  class AiSearchController {
+    +search(AiSearchRequest): ResponseEntity
+  }
+}
+
+package "service" {
+  class AuthenticationService
+  class HotelService
+  class RoomService
+  class BookingService {
+    +cancelBooking(id, username, isAdmin): CancellationResponse
+  }
+  class PaymentService {
+    +processPayment(PaymentRequest): PaymentResponse
+    +refundPayment(bookingId): PaymentResponse
+  }
+  class AiSearchOrchestrator {
+    +search(AiSearchRequest): AiSearchResponse
+  }
+}
+
+package "ai" {
+  interface QueryParserAiService {
+    +parse(query, today): SearchQuery
+  }
+  class SearchQuery {
+    +hotelName: String
+    +location: String
+    +city: String
+    +country: String
+    +starRating: Integer
+    +minPrice: BigDecimal
+    +maxPrice: BigDecimal
+    +checkInDate: String
+    +checkOutDate: String
+  }
+}
+
+package "repository" {
+  interface UserRepository
+  interface HotelRepository
+  interface RoomRepository
+  interface BookingRepository {
+    +existsOverlappingBooking(): boolean
+  }
+}
+
+package "entity" {
+  class User {
+    +id: Long
+    +username: String
+    +email: String
+    +password: String
+    +role: Role
+  }
+
+  class Hotel {
+    +id: Long
+    +name: String
+    +location: String
+    +city: String
+    +country: String
+    +starRating: Integer
+  }
+
+  class Room {
+    +id: Long
+    +roomNumber: String
+    +price: BigDecimal
+    +hotel: Hotel
+  }
+
+  class Booking {
+    +id: Long
+    +guestName: String
+    +checkInDate: LocalDate
+    +checkOutDate: LocalDate
+    +bookingStatus: BookingStatus
+    +paymentStatus: PaymentStatus
+    +totalPrice: BigDecimal
+    +room: Room
+  }
+
+  enum Role {
+    ADMIN
+    USER
+  }
+  enum BookingStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+  }
+  enum PaymentStatus {
+    UNPAID
+    PAID
+    REFUNDED
+  }
+  enum PaymentMethod {
+    CREDIT_CARD
+    DEBIT_CARD
+    UPI
+    NET_BANKING
+  }
+}
+
+package "dto" {
+  class PaymentRequest
+  class PaymentResponse
+  class CancellationResponse
+  class AiSearchRequest
+  class AiSearchResponse
+}
+
+package "exception" {
+  class GlobalExceptionHandler {
+    +handleIllegalState(): 409
+    +handleIllegalArgument(): 400
+  }
+}
+
+LangChain4jConfig --> QueryParserAiService
+LangChain4jConfig ..> AiSearchOrchestrator
+
+SecurityConfig --> JwtAuthenticationFilter
+SecurityConfig --> JwtAuthenticationEntryPoint
+SecurityConfig --> JwtAccessDeniedHandler
+ApplicationConfig --> CustomUserDetailsService
+
+JwtAuthenticationFilter --> JwtService
+JwtAuthenticationFilter --> CustomUserDetailsService
+CustomUserDetailsService --> UserRepository
+
+AuthController --> AuthenticationService
+HotelController --> HotelService
+RoomController --> RoomService
+BookingController --> BookingService
+PaymentController --> PaymentService
+AiSearchController --> AiSearchOrchestrator
+
+AuthenticationService --> UserRepository
+AuthenticationService --> JwtService
+HotelService --> HotelRepository
+RoomService --> RoomRepository
+RoomService --> HotelRepository
+BookingService --> BookingRepository
+BookingService --> RoomRepository
+PaymentService --> BookingRepository
+AiSearchOrchestrator --> QueryParserAiService
+AiSearchOrchestrator --> HotelService
+AiSearchOrchestrator --> RoomService
+AiSearchOrchestrator --> BookingRepository
+
+QueryParserAiService ..> SearchQuery : returns
+
+UserRepository --> User
+HotelRepository --> Hotel
+RoomRepository --> Room
+BookingRepository --> Booking
+
+User --> Role
+Booking --> BookingStatus
+Booking --> PaymentStatus
+Hotel "1" -- "many" Room
+Room "1" -- "many" Booking
+
+@enduml
+

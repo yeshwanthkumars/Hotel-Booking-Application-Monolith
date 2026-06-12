@@ -1,0 +1,38 @@
+@startuml HotelSequence
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 6
+
+title Hotel Scenario (View + Admin Create)
+
+actor "User/Admin" as U
+participant "JwtAuthenticationFilter" as JF
+participant "HotelController" as HC
+participant "HotelService" as HS
+participant "HotelRepository" as HR
+
+group View Hotels (ROLE_USER or ROLE_ADMIN)
+U -> JF : GET /api/v1/hotels\nBearer token
+JF -> HC : Forward authenticated request
+HC -> HS : getAllHotels()
+HS -> HR : findAll()
+HR --> HS : List<Hotel>
+HS --> HC : List<HotelResponse>
+HC --> U : 200 OK + hotels
+end
+
+group Create Hotel (ROLE_ADMIN)
+U -> JF : POST /api/v1/hotels\n{name, location}
+alt role = ADMIN
+  JF -> HC : Authorized request
+  HC -> HS : createHotel(hotelRequest)
+  HS -> HR : save(hotel)
+  HR --> HS : saved hotel
+  HS --> HC : HotelResponse
+  HC --> U : 201 Created
+else role != ADMIN
+  JF --> U : 403 Forbidden
+end
+end
+
+@enduml
+

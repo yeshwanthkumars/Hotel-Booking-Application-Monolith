@@ -1,0 +1,79 @@
+@startuml HLD
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+title High-Level Design - Simple Hotel Booking App
+
+actor "Client App" as Client
+component "Swagger UI" as Swagger
+
+node "Spring Boot Application" as App {
+  frame "Security Layer" as Sec {
+    component "SecurityFilterChain"
+    component "JwtAuthenticationFilter"
+    component "JwtService"
+    component "CustomUserDetailsService"
+    component "AuthEntryPoint / AccessDeniedHandler"
+  }
+
+  frame "API Layer" as Api {
+    component "AuthController"
+    component "HotelController"
+    component "RoomController"
+    component "BookingController"
+    component "PaymentController"
+    component "AiSearchController"
+  }
+
+  frame "Business Layer" as Biz {
+    component "AuthenticationService"
+    component "HotelService"
+    component "RoomService"
+    component "BookingService"
+    component "PaymentService"
+    component "AiSearchOrchestrator"
+  }
+
+  frame "AI Layer" as AiLayer {
+    component "QueryParserAiService"
+    component "LangChain4jConfig"
+  }
+
+  frame "Data Access Layer" as Dal {
+    component "UserRepository"
+    component "HotelRepository"
+    component "RoomRepository"
+    component "BookingRepository"
+  }
+}
+
+database "H2 In-Memory DB" as DB
+cloud "Anthropic Claude API" as Claude
+
+Client --> Sec : HTTPS requests
+Client --> Swagger : API docs
+Swagger --> Api
+
+Sec --> Api : authenticated requests
+Api --> Biz
+Biz --> Dal
+Dal --> DB
+
+AiSearchOrchestrator --> QueryParserAiService
+QueryParserAiService --> Claude : natural language → JSON
+AiSearchOrchestrator --> HotelService
+AiSearchOrchestrator --> RoomService
+
+note right of AiLayer
+  LangChain4j 0.36.0
+  Claude 3 Haiku / Sonnet
+  temperature=0.0 (deterministic)
+end note
+
+note bottom of Biz
+  PaymentService: mock TXN-XXXXXXXX
+  BookingService: cancel + auto-refund
+end note
+
+@enduml
+

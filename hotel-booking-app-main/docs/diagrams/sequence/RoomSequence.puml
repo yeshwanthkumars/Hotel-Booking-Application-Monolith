@@ -1,0 +1,49 @@
+@startuml RoomSequence
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 6
+
+title Room Scenario (View by Hotel + Admin Create)
+
+actor "User/Admin" as U
+participant "JwtAuthenticationFilter" as JF
+participant "RoomController" as RC
+participant "RoomService" as RS
+participant "HotelRepository" as HR
+participant "RoomRepository" as RR
+
+group View Rooms by Hotel (ROLE_USER or ROLE_ADMIN)
+U -> JF : GET /api/v1/rooms/hotel/{hotelId}\nBearer token
+JF -> RC : Forward authenticated request
+RC -> RS : getRoomsByHotelId(hotelId)
+RS -> HR : findById(hotelId)
+alt hotel exists
+  HR --> RS : Hotel
+  RS -> RR : findByHotelId(hotelId)
+  RR --> RS : List<Room>
+  RS --> RC : List<RoomResponse>
+  RC --> U : 200 OK + rooms
+else hotel missing
+  HR --> RS : empty
+  RS --> RC : ResourceNotFoundException
+  RC --> U : 404 Not Found
+end
+end
+
+group Create Room (ROLE_ADMIN)
+U -> JF : POST /api/v1/rooms\n{roomNumber, price, hotelId}
+alt role = ADMIN
+  JF -> RC : Authorized request
+  RC -> RS : createRoom(roomRequest)
+  RS -> HR : findById(hotelId)
+  HR --> RS : Hotel
+  RS -> RR : save(room)
+  RR --> RS : saved room
+  RS --> RC : RoomResponse
+  RC --> U : 201 Created
+else role != ADMIN
+  JF --> U : 403 Forbidden
+end
+end
+
+@enduml
+

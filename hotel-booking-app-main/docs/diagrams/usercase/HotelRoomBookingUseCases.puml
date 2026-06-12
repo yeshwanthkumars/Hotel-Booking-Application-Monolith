@@ -1,0 +1,71 @@
+@startuml HotelRoomBookingUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Guest" as Guest
+actor "User (ROLE_USER)" as User
+actor "Admin (ROLE_ADMIN)" as Admin
+
+rectangle "Simple Hotel Booking System" {
+  package "Hotel Use Cases" {
+    usecase "View All Hotels" as H1
+    usecase "View Hotel by ID" as H2
+    usecase "View Hotel by Name" as H3
+    usecase "Create Hotel" as H4
+    usecase "Update Hotel" as H5
+    usecase "Delete Hotel" as H6
+  }
+
+  package "Room Use Cases" {
+    usecase "View All Rooms" as R1
+    usecase "View Room by ID" as R2
+    usecase "View Rooms by Hotel" as R3
+    usecase "Create Room" as R4
+    usecase "Update Room" as R5
+    usecase "Delete Room" as R6
+  }
+
+  package "Booking Use Cases" {
+    usecase "Create Booking" as B1
+    usecase "View Booking by ID" as B2
+    usecase "View All Bookings" as B3
+    usecase "View Bookings by Room" as B4
+    usecase "Update Booking" as B5
+    usecase "Delete Booking" as B6
+  }
+}
+
+Guest --> H1
+Guest --> H2
+Guest --> H3
+
+User --> H1
+User --> H2
+User --> H3
+User --> R1
+User --> R2
+User --> R3
+User --> B1
+
+Admin --> H1
+Admin --> H2
+Admin --> H3
+Admin --> H4
+Admin --> H5
+Admin --> H6
+Admin --> R1
+Admin --> R2
+Admin --> R3
+Admin --> R4
+Admin --> R5
+Admin --> R6
+Admin --> B1
+Admin --> B2
+Admin --> B3
+Admin --> B4
+Admin --> B5
+Admin --> B6
+
+@enduml
+

@@ -1,0 +1,4 @@
+jwt:
+  secret: R2l0SHViQ29waWxvdFNwcmluZ0Jvb3RKd3RTZWNyZXRLZXlGb3JIUzI1NkFsZ29yaXRobQ==
+  expiration: 86400000
+

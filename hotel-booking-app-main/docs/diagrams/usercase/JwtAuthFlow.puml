@@ -1,0 +1,52 @@
+@startuml JwtAuthFlow
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam sequenceParticipant underline
+
+participant "Client" as C
+participant "AuthController" as AC
+participant "AuthenticationService" as AS
+participant "UserRepository" as UR
+participant "JwtService" as JS
+participant "JwtAuthFilter" as JF
+participant "BusinessController" as BC
+
+== REGISTER FLOW ==
+C -> AC : POST /api/auth/register\n{ username, email, password, role }
+AC -> AS : register(RegisterRequest)
+AS -> UR : save(User)
+UR --> AS : saved User
+AS --> AC : AuthenticationResponse\n{ username, email, role, message }
+AC --> C : 201 Created (no token)
+
+== LOGIN FLOW ==
+C -> AC : POST /api/auth/login\n{ username, password }
+AC -> AS : login(AuthenticationRequest)
+AS -> UR : findByUsername(username)
+UR --> AS : User entity
+AS -> JS : generateToken(userDetails)
+JS --> AS : JWT token
+AS --> AC : AuthenticationResponse\n{ username, email, role, message, token }
+AC --> C : 200 OK + JWT token
+
+== SECURED REQUEST FLOW ==
+C -> JF : GET /api/v1/hotels\nAuthorization: Bearer <token>
+JF -> JS : extractUsername(token)
+JS --> JF : username
+JF -> UR : loadUserByUsername(username)
+UR --> JF : UserDetails
+JF -> JS : validateToken(token, userDetails)
+
+alt Token Valid
+    JS --> JF : true
+    JF -> BC : Forward authenticated request
+    BC --> C : 200 OK + Response Body
+else Token Invalid or Missing
+    JS --> JF : false / exception
+    JF --> C : 401 Unauthorized
+else Access Denied (wrong role)
+    JF --> C : 403 Forbidden
+end
+
+@enduml
+

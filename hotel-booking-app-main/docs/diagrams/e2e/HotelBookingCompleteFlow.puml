@@ -1,0 +1,250 @@
+@startuml HotelBookingCompleteFlow
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #F8F9FA
+  BorderColor #2C3E50
+  ArrowColor #2C3E50
+}
+
+title Complete Application Flow - Simple Hotel Booking App
+
+start
+
+partition "Client (Guest)" {
+  :Open application;
+  :Choose Register or Login;
+}
+
+if (Register?) then (yes)
+  partition "Auth API" {
+    :POST /api/auth/register
+(username, email, password, role);
+  }
+
+  partition "AuthenticationService" {
+    if (Username or email exists?) then (yes)
+      :Throw UserAlreadyExistsException;
+      partition "Client" {
+        :409 Conflict;
+      }
+    else (no)
+      :Encode password;
+      :Save user in users table;
+      partition "Client" {
+        :201 Created
+(username, email, role, message);
+      }
+    endif
+  }
+endif
+
+partition "Client" {
+  :POST /api/auth/login
+(username, password);
+}
+
+partition "AuthenticationService" {
+  if (Credentials valid?) then (no)
+    :Throw BadCredentialsException;
+    partition "Client" {
+      :401 Unauthorized;
+      stop
+    }
+  else (yes)
+    :Generate JWT token;
+    partition "Client" {
+      :200 OK
+(username, email, role, message, token);
+      :Store token;
+    }
+  endif
+}
+
+partition "Client" {
+  :Call secured API with Bearer token;
+}
+
+partition "JwtAuthenticationFilter" {
+  if (Token missing/invalid/expired?) then (yes)
+    :AuthenticationEntryPoint;
+    partition "Client" {
+      :401 Unauthorized;
+      stop
+    }
+  else (no)
+    :Extract username from JWT;
+    :Load user details;
+    :Set SecurityContext;
+  endif
+}
+
+partition "Authorization (Method Security)" {
+  if (Role allowed for endpoint?) then (no)
+    :AccessDeniedHandler;
+    partition "Client" {
+      :403 Forbidden;
+      stop
+    }
+  else (yes)
+    :Forward to controller;
+  endif
+}
+
+partition "Business APIs" {
+  if (Requested module?) then (Hotels)
+    :HotelController -> HotelService;
+    if (Operation type?) then (Read: USER/ADMIN)
+      :findById/findByName/findAll;
+      partition "Client" {
+        :200 OK + hotel data;
+      }
+    else (Write: ADMIN)
+      :save/update/delete hotel;
+      partition "Client" {
+        :201/200/204 response;
+      }
+    endif
+
+  elseif (Rooms)
+    :RoomController -> RoomService;
+    if (Read operation?) then (yes)
+      :find room(s);
+      partition "Client" {
+        :200 OK + room data;
+      }
+    else (ADMIN write)
+      if (Hotel exists for room?) then (no)
+        partition "Client" {
+          :404 Not Found (hotel);
+        }
+      else (yes)
+        :save/update/delete room;
+        partition "Client" {
+          :201/200/204 response;
+        }
+      endif
+    endif
+
+  elseif (Bookings)
+    :BookingController -> BookingService;
+    if (Create booking?) then (yes)
+      if (Date range valid?) then (no)
+        partition "Client" {
+          :400 Bad Request (invalid dates);
+        }
+      else (yes)
+        if (Room exists?) then (no)
+          partition "Client" {
+            :404 Not Found (room);
+          }
+        else (yes)
+          :Save booking (status=PENDING, payment=UNPAID);
+          partition "Client" {
+            :201 Created + booking data;
+          }
+        endif
+      endif
+    elseif (Cancel booking? POST /{id}/cancel)
+      if (Owner or ADMIN?) then (no)
+        partition "Client" {
+          :403 Forbidden;
+        }
+      else (yes)
+        if (Already CANCELLED?) then (yes)
+          partition "Client" {
+            :409 Conflict;
+          }
+        else (no)
+          :Set bookingStatus = CANCELLED;
+          if (Was PAID?) then (yes)
+            :Set paymentStatus = REFUNDED;
+            partition "Client" {
+              :200 OK + CancellationResponse (refunded=true);
+            }
+          else (no)
+            partition "Client" {
+              :200 OK + CancellationResponse (refunded=false);
+            }
+          endif
+        endif
+      endif
+    else (Admin booking read/update/delete)
+      :find/update/delete booking;
+      partition "Client" {
+        :200/204 response or 404 if missing;
+      }
+    endif
+
+  elseif (Payment)
+    :PaymentController -> PaymentService;
+    if (Process payment? POST /payments/process) then (yes)
+      if (Booking exists?) then (no)
+        partition "Client" {
+          :404 Not Found;
+        }
+      else (yes)
+        if (Already PAID or CANCELLED?) then (yes)
+          partition "Client" {
+            :409 Conflict;
+          }
+        else (no)
+          if (Amount matches totalPrice?) then (no)
+            partition "Client" {
+              :400 Bad Request (amount mismatch);
+            }
+          else (yes)
+            :Generate mock TXN-XXXXXXXX ref;
+            :Set bookingStatus = CONFIRMED;
+            :Set paymentStatus = PAID;
+            partition "Client" {
+              :200 OK + PaymentResponse (transactionRef);
+            }
+          endif
+        endif
+      endif
+    else (Refund? POST /payments/refund/{id} — ADMIN only)
+      if (Booking is PAID?) then (no)
+        partition "Client" {
+          :409 Conflict (not eligible);
+        }
+      else (yes)
+        :Set bookingStatus = CANCELLED;
+        :Set paymentStatus = REFUNDED;
+        partition "Client" {
+          :200 OK + PaymentResponse (REFUNDED);
+        }
+      endif
+    endif
+
+  else (AI Search)
+    :AiSearchController -> AiSearchOrchestrator;
+    :Send query to Claude via QueryParserAiService;
+    :Claude extracts: city, country, starRating,\nminPrice, maxPrice, checkIn, checkOut;
+    :Phase 1 — HotelService.getAllHotels() with filters;
+    if (Dates extracted?) then (yes)
+      :Phase 2 — RoomService.getAllRooms();
+      :Filter by matched hotels;
+      :Check BookingRepository.existsOverlappingBooking();
+      partition "Client" {
+        :200 OK + AiSearchResponse\n(hotels + availableRooms);
+      }
+    else (no)
+      partition "Client" {
+        :200 OK + AiSearchResponse\n(hotels only);
+      }
+    endif
+  endif
+}
+
+partition "Persistence (H2 In-Memory DB)" {
+  :Repositories use JPA/Hibernate;
+  :Tables: users, hotels, rooms, bookings;
+}
+
+partition "Client" {
+  :Display API response in UI/Postman;
+}
+
+stop
+@enduml
+
